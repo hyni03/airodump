@@ -6,7 +6,8 @@
 #include <mutex>
 #include <atomic>
 #include <pcap.h>
-#include <time.h>
+#include <cstdint>
+#include "ieee80211.h"
 
 // AP 정보 구조체
 struct ap_info {
@@ -37,12 +38,18 @@ extern std::atomic<int> g_current_channel;
 extern std::atomic<bool> g_running;
 
 // 함수 프로토타입
-std::string mac_to_string(const uint8_t mac[6]);
-void channel_hop_thread(const char *ifname);
-// void print_result();
-void init_ncurses();
-void end_ncurses();
-void print_result_ncurses();
-void parse_packet(const struct pcap_pkthdr *header, const u_char *packet);
+std::string mac_to_string(const uint8_t mac[6]);                  // MAC 주소를 문자열로 변환
+void channel_hop_thread(const char *ifname);                      // 채널 호핑 스레드 함수
+void init_ncurses();                                              // ncurses 초기화
+void end_ncurses();                                               // ncurses 종료
+void print_result_ncurses();                                      // ncurses 화면 출력
+void parse_packet(const struct pcap_pkthdr *header, const u_char *packet); // 패킷 분석
+
+void process_beacon_frame(const struct pcap_pkthdr *header, const ieee80211_frame *wifi, const u_char *packet);
+void process_probe_request(const ieee80211_frame *wifi);
+void process_station_frame(const ieee80211_frame *wifi);
+void parse_tagged_params(const uint8_t *tagged_params, const uint8_t *packet_end,
+                         std::string &essid, std::string &enc_str,
+                         std::string &cipher_str, std::string &auth_str);
 
 #endif // AIRODUMP_H
